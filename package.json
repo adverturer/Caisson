@@ -1,0 +1,68 @@
+{
+  "name": "@deepseek-ai/dsh-desktop",
+  "description": "Electron launcher for the dsh Web GUI: spawns or attaches to the dsh web server and carries a system-tray menu.",
+  "version": "0.1.0-rc.5",
+  "private": true,
+  "license": "MIT",
+  "type": "commonjs",
+  "main": "lib/main.js",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "watch": "tsc -p tsconfig.json --watch",
+    "start": "electron .",
+    "gen-icon": "pwsh -NoProfile -ExecutionPolicy Bypass -File scripts/gen-icon.ps1",
+    "prepare:runtime": "pnpm exec tsx scripts/prepare-runtime.ts",
+    "dist": "pnpm run build && pnpm run prepare:runtime && electron-builder --win"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@types/node": "^22.20.0",
+    "electron": "^33.0.0",
+    "electron-builder": "^26.0.0",
+    "typescript": "^6.0.3"
+  },
+  "build": {
+    "appId": "ai.deepseek.dsh",
+    "productName": "DeepSeek Harness",
+    "asar": true,
+    "directories": {
+      "output": "release"
+    },
+    "electronDist": "node_modules/electron/dist",
+    "afterPack": "scripts/after-pack.cjs",
+    "files": [
+      "lib/**/*",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "dist-runtime/final",
+        "to": "runtime"
+      },
+      {
+        "from": "dist-runtime/node",
+        "to": "node"
+      },
+      {
+        "from": "resources",
+        "to": "."
+      }
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": ["x64"]
+        }
+      ],
+      "icon": "resources/icon.png"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "DeepSeek Harness"
+    }
+  }
+}
