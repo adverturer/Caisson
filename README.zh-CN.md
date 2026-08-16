@@ -87,42 +87,29 @@ pnpm start
 
 > [!NOTE]
 > **仅面向开发者。** 如果你只是想*使用* Caisson，跳过本节——从 [Releases](https://github.com/adverturer/Caisson/releases) 下载预构建安装包即可，无需其他任何东西。
->
-> 本仓库只保存启动器源码——不含约 244 MB 的 DSH 运行时闭包。构建安装包需要一份 deepseek-harness 工作区，用来解析 [`runtime-deploy/package.json`](runtime-deploy/package.json) 里的 `workspace:` 依赖并构建前端 `dist/`。打包脚本假定 Caisson 检出在 deepseek-harness 的 `apps/desktop`：
+
+本仓库只保存启动器源码——不含约 250 MB 的 DSH 运行时闭包。内置运行时是通过 `npm install @deepseek-ai/dsh@0.1.0-rc.6` 安装的 rc.6 闭包，并在 `dsh-client-ui-settings-models` 上叠加了推理强度 + 取消全部功能。
+
+### 前置条件
+
+1. 便携版 Node.js：放在 `dist-runtime/node/node.exe`（从 [npmmirror](https://npmmirror.com/mirrors/node/v24.18.0/node-v24.18.0-win-x64.zip) 下载解压到 `dist-runtime/node/`）。
+2. rc.6 运行时闭包：在独立目录 `npm install @deepseek-ai/dsh`，然后将 deepseek-harness 源码构建的 `packages/client/ui-settings-models/lib/client.js` 覆盖到 `node_modules/@deepseek-ai/dsh-client-ui-settings-models/lib/client.js`（应用功能补丁）。
+3. Electron 33：安装在 `node_modules/electron/dist`（`electronDist` 配置指向此处）。
+
+### 打包
 
 ```powershell
-git clone https://github.com/deepseek-ai/deepseek-harness.git
-cd deepseek-harness
-git clone https://github.com/adverturer/Caisson.git apps/desktop
+npm install
+npx tsc -p tsconfig.json
+npx electron-builder --win
 ```
 
-确认 deepseek-harness 的 `pnpm-workspace.yaml` 包含：
+产物：`release-rc6/DeepSeek Harness Setup <版本号>.exe`
 
-```yaml
-packages:
-  - apps/*
-  - apps/desktop/runtime-deploy
+`afterPack` 钩子（`scripts/after-pack.cjs`）把 rc.6 闭包从 npm 安装目录复制进 `resources/runtime/`，恢复 electron-builder 文件过滤器丢掉的根 `node_modules`。
 
-overrides:
-  '@electron/get': '3.1.0'   # electron-builder 26 需要 ElectronDownloadCacheMode（3.0.0 里缺失）
-
-allowBuilds:
-  electron: true
-  electron-winstaller: true
-```
-
-然后构建打包：
-
-```powershell
-corepack enable
-pnpm install
-pnpm run build                     # 构建 DSH lib/ 和前端 dist/
-pnpm --filter @deepseek-ai/dsh-desktop run dist
-```
-
-产物：`apps/desktop/release/DeepSeek Harness Setup <版本号>.exe`
-
-`dist` 脚本依次执行：`tsc` 编译 → `pnpm deploy` 生成运行时闭包（symlink 物化为真实目录）→ 暂存便携版 Node.js → electron-builder 生成 NSIS x64 安装包 → `afterPack` 钩子把 electron-builder 文件过滤器丢掉的根 `node_modules` 补回产物。
+> [!IMPORTANT]
+> `afterPack` 的源路径硬编码为 `C:\Users\幻梦\Desktop\ds`。打包前请修改 `scripts/after-pack.cjs` 里的 `RUNTIME_SOURCE` 指向你自己的 rc.6 npm 安装目录。
 
 ## 环境变量
 

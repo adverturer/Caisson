@@ -1,7 +1,7 @@
 {
   "name": "@deepseek-ai/dsh-desktop",
   "description": "Electron launcher for the dsh Web GUI: spawns or attaches to the dsh web server and carries a system-tray menu.",
-  "version": "0.1.0-rc.5",
+  "version": "0.1.0-rc.6",
   "private": true,
   "license": "MIT",
   "type": "commonjs",
@@ -11,8 +11,7 @@
     "watch": "tsc -p tsconfig.json --watch",
     "start": "electron .",
     "gen-icon": "pwsh -NoProfile -ExecutionPolicy Bypass -File scripts/gen-icon.ps1",
-    "prepare:runtime": "pnpm exec tsx scripts/prepare-runtime.ts",
-    "dist": "pnpm run build && pnpm run prepare:runtime && electron-builder --win"
+    "dist": "pnpm run build && electron-builder --win"
   },
   "dependencies": {},
   "devDependencies": {
@@ -26,7 +25,7 @@
     "productName": "DeepSeek Harness",
     "asar": true,
     "directories": {
-      "output": "release"
+      "output": "release-rc6"
     },
     "electronDist": "node_modules/electron/dist",
     "afterPack": "scripts/after-pack.cjs",
@@ -35,10 +34,6 @@
       "package.json"
     ],
     "extraResources": [
-      {
-        "from": "dist-runtime/final",
-        "to": "runtime"
-      },
       {
         "from": "dist-runtime/node",
         "to": "node"

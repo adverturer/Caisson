@@ -87,42 +87,29 @@ pnpm start
 
 > [!NOTE]
 > **Developers only.** If you just want to *use* Caisson, skip this section — download the prebuilt installer from [Releases](https://github.com/adverturer/Caisson/releases) and you are done; nothing else is required.
->
-> This repository holds the launcher source only — not the ~244 MB DSH runtime closure. Building the installer requires a deepseek-harness workspace to resolve the `workspace:` dependencies in [`runtime-deploy/package.json`](runtime-deploy/package.json) and to build the frontend `dist/`. The packaging scripts expect the Caisson checkout to live at `apps/desktop` inside deepseek-harness:
+
+This repository holds the launcher source only — not the ~250 MB DSH runtime closure. The bundled runtime is an npm-installed `@deepseek-ai/dsh@0.1.0-rc.6` closure (with the per-model reasoning-effort + cancel-all feature overlay applied to `dsh-client-ui-settings-models`).
+
+### Prerequisites
+
+1. A portable Node.js runtime staged at `dist-runtime/node/node.exe` (used as the bundled Node). Download from [npmmirror](https://npmmirror.com/mirrors/node/v24.18.0/node-v24.18.0-win-x64.zip) and extract into `dist-runtime/node/`.
+2. The rc.6 runtime closure: `npm install @deepseek-ai/dsh` in a separate directory, then apply the feature overlay by copying `packages/client/ui-settings-models/lib/client.js` from a deepseek-harness source build over `node_modules/@deepseek-ai/dsh-client-ui-settings-models/lib/client.js`.
+3. Electron 33 installed at `node_modules/electron/dist` (the `electronDist` config points here).
+
+### Package
 
 ```powershell
-git clone https://github.com/deepseek-ai/deepseek-harness.git
-cd deepseek-harness
-git clone https://github.com/adverturer/Caisson.git apps/desktop
+npm install
+npx tsc -p tsconfig.json
+npx electron-builder --win
 ```
 
-Ensure the deepseek-harness `pnpm-workspace.yaml` includes:
+Output: `release-rc6/DeepSeek Harness Setup <version>.exe`
 
-```yaml
-packages:
-  - apps/*
-  - apps/desktop/runtime-deploy
+The `afterPack` hook (`scripts/after-pack.cjs`) copies the full rc.6 closure from the npm install directory into `resources/runtime/`, restoring the root `node_modules` that electron-builder's file filter drops.
 
-overrides:
-  '@electron/get': '3.1.0'   # electron-builder 26 needs ElectronDownloadCacheMode (missing in 3.0.0)
-
-allowBuilds:
-  electron: true
-  electron-winstaller: true
-```
-
-Then build and package:
-
-```powershell
-corepack enable
-pnpm install
-pnpm run build                     # builds DSH lib/ + frontend dist/
-pnpm --filter @deepseek-ai/dsh-desktop run dist
-```
-
-Output: `apps/desktop/release/DeepSeek Harness Setup <version>.exe`
-
-The `dist` script runs: `tsc` → `pnpm deploy` of the runtime closure (symlinks materialized into real dirs) → portable Node.js staging → electron-builder (NSIS x64) → `afterPack` hook restores the root `node_modules` that electron-builder's file filter drops.
+> [!IMPORTANT]
+> The `afterPack` source path is hardcoded to `C:\Users\幻梦\Desktop\ds`. Update `RUNTIME_SOURCE` in `scripts/after-pack.cjs` to point at your own rc.6 npm install directory before building.
 
 ## Environment variables
 

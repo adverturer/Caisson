@@ -1,7 +1,7 @@
 {
   "name": "@deepseek-ai/dsh-desktop-runtime",
   "description": "Deploy root for the desktop launcher's bundled dsh web runtime: a pure dependency manifest whose closure (the dsh CLI app + all web bundles + the built frontend dist + peer service definitions) is materialized into node_modules by pnpm deploy, then shipped inside the Electron launcher.",
-  "version": "0.1.0-rc.5",
+  "version": "0.1.0-rc.6",
   "private": true,
   "type": "module",
   "dependencies": {
