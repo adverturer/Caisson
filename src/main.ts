@@ -353,7 +353,7 @@ function rebuildTrayMenu(): void {
 
 function createTray(): void {
   tray = new Tray(trayIcon())
-  tray.setToolTip('DeepSeek Harness')
+  tray.setToolTip('Caisson')
   tray.on('click', () => showMainWindow())
   tray.on('double-click', () => showMainWindow())
   rebuildTrayMenu()

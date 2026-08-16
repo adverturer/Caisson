@@ -21,8 +21,8 @@
     "typescript": "^6.0.3"
   },
   "build": {
-    "appId": "ai.deepseek.dsh",
-    "productName": "DeepSeek Harness",
+    "appId": "com.caisson.launcher",
+    "productName": "Caisson",
     "asar": true,
     "directories": {
       "output": "release-rc6"
@@ -57,7 +57,7 @@
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
-      "shortcutName": "DeepSeek Harness"
+      "shortcutName": "Caisson"
     }
   }
 }
