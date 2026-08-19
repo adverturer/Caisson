@@ -2,3 +2,5 @@ lib/
 node_modules/
 dist-runtime/
 release/
+release-*/
+RELEASE_NOTES_*.md

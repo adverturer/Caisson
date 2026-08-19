@@ -35,7 +35,7 @@ The prebuilt Windows installer is fully self-contained (Electron shell + portabl
 Grab the latest installer from [Releases](https://github.com/adverturer/Caisson/releases):
 
 ```
-DeepSeek Harness Setup <version>.exe
+Caisson Setup <version>.exe
 ```
 
 Requirements: Windows 10/11 x64. No Node.js, pnpm, or deepseek-harness checkout needed — everything ships inside the installer.
@@ -104,12 +104,11 @@ npx tsc -p tsconfig.json
 npx electron-builder --win
 ```
 
-Output: `release-rc6/DeepSeek Harness Setup <version>.exe`
+Output: `release-0.1.1/Caisson Setup 0.1.1.exe`
 
 The `afterPack` hook (`scripts/after-pack.cjs`) copies the full rc.6 closure from the npm install directory into `resources/runtime/`, restoring the root `node_modules` that electron-builder's file filter drops.
 
-> [!IMPORTANT]
-> The `afterPack` source path is hardcoded to `C:\Users\幻梦\Desktop\ds`. Update `RUNTIME_SOURCE` in `scripts/after-pack.cjs` to point at your own rc.6 npm install directory before building.
+Set `DSH_DESKTOP_RUNTIME_SOURCE` to the prepared rc.6 npm closure before packaging. When it is omitted, `afterPack` uses `dist-runtime/final`.
 
 ## Environment variables
 
@@ -118,6 +117,7 @@ The `afterPack` hook (`scripts/after-pack.cjs`) copies the full rc.6 closure fro
 | `DSH_DESKTOP_PORT` | `3080` | Web port the launcher manages and opens |
 | `DSH_REPO_ROOT` | derived | deepseek-harness checkout root (source mode) |
 | `DSH_NODE` | `NODE` / `node` | Node executable for the DSH CLI (source mode) |
+| `DSH_DESKTOP_RUNTIME_SOURCE` | `dist-runtime/final` | Prepared rc.6 npm closure copied into packaged builds |
 | `DSH_DESKTOP_NODE_VERSION` | `v24.18.0` | Node.js version bundled at package time |
 | `DSH_DESKTOP_NODE_MIRROR` | npmmirror | Custom Node.js download mirror |
 

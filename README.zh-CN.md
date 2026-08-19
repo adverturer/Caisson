@@ -35,7 +35,7 @@ Caisson 把 DeepSeek Harness 的 Web 界面装进原生 Electron 窗口，并负
 从 [Releases](https://github.com/adverturer/Caisson/releases) 下载最新安装包：
 
 ```
-DeepSeek Harness Setup <版本号>.exe
+Caisson Setup <版本号>.exe
 ```
 
 系统要求：Windows 10/11 x64。不需要安装 Node.js、pnpm 或 deepseek-harness 源码——运行所需的一切都在安装包里。
@@ -104,12 +104,11 @@ npx tsc -p tsconfig.json
 npx electron-builder --win
 ```
 
-产物：`release-rc6/DeepSeek Harness Setup <版本号>.exe`
+产物：`release-0.1.1/Caisson Setup 0.1.1.exe`
 
 `afterPack` 钩子（`scripts/after-pack.cjs`）把 rc.6 闭包从 npm 安装目录复制进 `resources/runtime/`，恢复 electron-builder 文件过滤器丢掉的根 `node_modules`。
 
-> [!IMPORTANT]
-> `afterPack` 的源路径硬编码为 `C:\Users\幻梦\Desktop\ds`。打包前请修改 `scripts/after-pack.cjs` 里的 `RUNTIME_SOURCE` 指向你自己的 rc.6 npm 安装目录。
+打包前通过 `DSH_DESKTOP_RUNTIME_SOURCE` 指定准备好的 rc.6 npm 闭包；未设置时，`afterPack` 使用 `dist-runtime/final`。
 
 ## 环境变量
 
@@ -118,6 +117,7 @@ npx electron-builder --win
 | `DSH_DESKTOP_PORT` | `3080` | 启动器管理并打开的 Web 端口 |
 | `DSH_REPO_ROOT` | 自动推导 | deepseek-harness 源码根目录（源码模式） |
 | `DSH_NODE` | `NODE` / `node` | 源码模式下启动 DSH CLI 用的 Node 可执行文件 |
+| `DSH_DESKTOP_RUNTIME_SOURCE` | `dist-runtime/final` | 打包时复制进应用的 rc.6 npm 闭包 |
 | `DSH_DESKTOP_NODE_VERSION` | `v24.18.0` | 打包时内置的 Node.js 版本 |
 | `DSH_DESKTOP_NODE_MIRROR` | npmmirror | 自定义 Node.js 下载镜像 |
 
