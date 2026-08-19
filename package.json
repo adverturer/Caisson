@@ -59,7 +59,8 @@
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
-      "shortcutName": "Caisson"
+      "shortcutName": "Caisson",
+      "include": "build/installer.nsh"
     }
   }
 }

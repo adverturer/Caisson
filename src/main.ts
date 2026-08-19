@@ -13,9 +13,10 @@
  */
 
 import { app, BrowserWindow, Menu, nativeImage, Notification, shell, Tray } from 'electron'
-import { spawn, type ChildProcess } from 'node:child_process'
+import { spawn, spawnSync, type ChildProcess } from 'node:child_process'
 import { existsSync } from 'node:fs'
 import { join, resolve } from 'node:path'
+import { homedir } from 'node:os'
 
 // ── layout anchors ──────────────────────────────────────────────────────────
 
@@ -359,6 +360,68 @@ function createTray(): void {
   rebuildTrayMenu()
 }
 
+// ── bundled plugins bootstrap ───────────────────────────────────────────────
+
+/**
+ * Plugins that Caisson ensures are installed into the user's private web
+ * profile on first launch. Each entry is a package name resolvable from the
+ * npm registry configured for the bundled dsh runtime. Idempotent: already-
+ * installed plugins are left alone, so this is safe to run on every boot.
+ *
+ * The bundled runtime's `dsh` CLI is used to perform the install so the
+ * profile layout always matches what `dsh web` later reads.
+ */
+const BUNDLED_PLUGINS: readonly string[] = ['dshmarket']
+
+/**
+ * The user-private web profile directory that `dsh web` loads plugins from.
+ * Kept in sync with the dsh CLI's profile resolution (see @deepseek-ai/dsh).
+ */
+function webProfileDir(): string {
+  return join(homedir(), '.dsh', 'profiles', 'web')
+}
+
+/**
+ * Path to the bundled `dsh.cmd` shim inside the packaged runtime. Used to
+ * drive `dsh plugin --profile web add ...` without requiring `dsh` on PATH.
+ */
+function bundledDshCmd(): string {
+  return join(runtimeRoot(), 'node_modules', '.bin', process.platform === 'win32' ? 'dsh.cmd' : 'dsh')
+}
+
+/**
+ * Ensure every {@link BUNDLED_PLUGINS} entry is present in the user's web
+ * profile. Runs synchronously before the server boots so plugins are loaded
+ * on the very first launch. Failures are non-fatal — the server still boots
+ * and the user can retry from a terminal.
+ */
+function ensureBundledPlugins(): void {
+  if (!packaged()) return // only bootstrap in packaged builds; dev uses the repo directly
+  const dsh = bundledDshCmd()
+  if (!existsSync(dsh)) {
+    console.warn(`[caisson] bundled dsh not found at ${dsh}; skipping plugin bootstrap`)
+    return
+  }
+  const profile = webProfileDir()
+  for (const name of BUNDLED_PLUGINS) {
+    try {
+      console.log(`[caisson] ensuring plugin ${name} in ${profile}`)
+      const result = spawnSync(dsh, ['plugin', '--profile', 'web', 'add', name], {
+        cwd: profile,
+        windowsVerbatimArguments: false,
+        stdio: ['ignore', 'pipe', 'pipe'],
+        shell: process.platform === 'win32',
+      })
+      if (result.status !== 0) {
+        const tail = (result.stderr?.toString() ?? result.stdout?.toString() ?? '').trim().split('\n').slice(-3).join('\n')
+        console.warn(`[caisson] plugin ${name} install returned ${String(result.status)}: ${tail}`)
+      }
+    } catch (error) {
+      console.warn(`[caisson] plugin ${name} install failed:`, error instanceof Error ? error.message : String(error))
+    }
+  }
+}
+
 // ── app lifecycle ────────────────────────────────────────────────────────────
 
 // Single instance: a second launch focuses the existing window instead.
@@ -372,6 +435,7 @@ if (!app.requestSingleInstanceLock()) {
       app.setAppUserModelId('ai.deepseek.dsh')
     }
     createTray()
+    ensureBundledPlugins()
     await ensureServerAndWindow()
   })
 
