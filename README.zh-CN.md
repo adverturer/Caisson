@@ -31,6 +31,8 @@ Caisson 把 DeepSeek Harness 的 Web 界面装进原生 Electron 窗口，并负
 - 服务只监听回环地址（`127.0.0.1`），不向局域网暴露
 - 首次启动自动安装内置的 `dshmarket` 插件
 - 安装时自动将内置 `dsh` CLI 目录加入当前用户的 PATH
+- 支持不选择工作区直接对话，并为每个任务管理独立目录
+- 可从会话菜单确认后永久删除会话
 
 ## 下载
 
@@ -90,12 +92,12 @@ pnpm start
 > [!NOTE]
 > **仅面向开发者。** 如果你只是想*使用* Caisson，跳过本节——从 [Releases](https://github.com/adverturer/Caisson/releases) 下载预构建安装包即可，无需其他任何东西。
 
-本仓库只保存启动器源码——不含约 250 MB 的 DSH 运行时闭包。内置运行时是通过 `npm install @deepseek-ai/dsh@0.1.0-rc.6` 安装的 rc.6 闭包，并在 `dsh-client-ui-settings-models` 上叠加了推理强度 + 取消全部功能；本版本还会自动配置 `dshmarket` 插件并在安装后提供内置 CLI。
+本仓库只保存启动器源码——不含约 250 MB 的 DSH 运行时闭包。正式构建使用包含 Caisson 功能集的已准备 DSH 运行时闭包；启动器还会自动配置 `dshmarket` 插件，并在安装后提供内置 CLI。
 
 ### 前置条件
 
 1. 便携版 Node.js：放在 `dist-runtime/node/node.exe`（从 [npmmirror](https://npmmirror.com/mirrors/node/v24.18.0/node-v24.18.0-win-x64.zip) 下载解压到 `dist-runtime/node/`）。
-2. rc.6 运行时闭包：在独立目录 `npm install @deepseek-ai/dsh`，然后将 deepseek-harness 源码构建的 `packages/client/ui-settings-models/lib/client.js` 覆盖到 `node_modules/@deepseek-ai/dsh-client-ui-settings-models/lib/client.js`（应用功能补丁）。
+2. 一份已准备的 DSH 运行时闭包，其中包含 `package.json`、`node_modules` 和已编译的 Web 前端。通过 `DSH_DESKTOP_RUNTIME_SOURCE` 指定路径，或放在 `dist-runtime/final`。
 3. Electron 33：安装在 `node_modules/electron/dist`（`electronDist` 配置指向此处）。
 
 ### 打包
@@ -106,11 +108,11 @@ npx tsc -p tsconfig.json
 npx electron-builder --win
 ```
 
-产物：`release-0.1.2/Caisson Setup 0.1.2.exe`
+产物：`release-0.1.3/Caisson Setup 0.1.3.exe`
 
-`afterPack` 钩子（`scripts/after-pack.cjs`）把 rc.6 闭包从 npm 安装目录复制进 `resources/runtime/`，恢复 electron-builder 文件过滤器丢掉的根 `node_modules`。
+`afterPack` 钩子（`scripts/after-pack.cjs`）把已准备的运行时闭包复制进 `resources/runtime/`，恢复 electron-builder 文件过滤器丢掉的根 `node_modules`。
 
-打包前通过 `DSH_DESKTOP_RUNTIME_SOURCE` 指定准备好的 rc.6 npm 闭包；未设置时，`afterPack` 使用 `dist-runtime/final`。
+打包前通过 `DSH_DESKTOP_RUNTIME_SOURCE` 指定准备好的运行时闭包；未设置时，`afterPack` 使用 `dist-runtime/final`。
 
 ## 环境变量
 
@@ -119,7 +121,7 @@ npx electron-builder --win
 | `DSH_DESKTOP_PORT` | `3080` | 启动器管理并打开的 Web 端口 |
 | `DSH_REPO_ROOT` | 自动推导 | deepseek-harness 源码根目录（源码模式） |
 | `DSH_NODE` | `NODE` / `node` | 源码模式下启动 DSH CLI 用的 Node 可执行文件 |
-| `DSH_DESKTOP_RUNTIME_SOURCE` | `dist-runtime/final` | 打包时复制进应用的 rc.6 npm 闭包 |
+| `DSH_DESKTOP_RUNTIME_SOURCE` | `dist-runtime/final` | 打包时复制进应用的 DSH 运行时闭包 |
 | `DSH_DESKTOP_NODE_VERSION` | `v24.18.0` | 打包时内置的 Node.js 版本 |
 | `DSH_DESKTOP_NODE_MIRROR` | npmmirror | 自定义 Node.js 下载镜像 |
 

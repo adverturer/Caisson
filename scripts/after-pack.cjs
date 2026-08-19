@@ -4,10 +4,10 @@
  * electron-builder's file filter hard-excludes a root `node_modules` directory
  * from extraResources (util/filter.js: "filter the root node_modules"), so a
  * packaged dsh runtime closure would silently lose its node_modules tree. This
- * hook copies the full rc.6 runtime closure (package.json + node_modules, with
- * the selected Caisson feature overlay applied) into the
- * unpacked app's resources/runtime after packaging, restoring what the filter
- * dropped. Runs for every produced target (win-unpacked / nsis both).
+ * hook copies the prepared DSH runtime closure (package.json + node_modules)
+ * into the unpacked app's resources/runtime after packaging, restoring what
+ * the filter dropped. Runs for every produced target (win-unpacked / nsis
+ * both).
  *
  * Set DSH_DESKTOP_RUNTIME_SOURCE to package a prepared runtime outside this
  * repository. Otherwise dist-runtime/final is used.
@@ -31,7 +31,7 @@ async function afterPack(context) {
   const dest = path.join(appOutDir, 'resources', 'runtime')
   await access(path.join(source, 'package.json'), constants.R_OK)
   await access(path.join(source, 'node_modules'), constants.R_OK)
-  console.log(`afterPack: restoring rc.6 dsh runtime closure from ${source} into ${dest}`)
+  console.log(`afterPack: restoring prepared DSH runtime closure from ${source} into ${dest}`)
   // Replace whatever electron-builder copied (it drops node_modules) with the
   // full closure, dereferencing junctions/symlinks into real files.
   await rm(dest, { recursive: true, force: true })

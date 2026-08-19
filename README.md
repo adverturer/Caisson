@@ -31,6 +31,8 @@ The prebuilt Windows installer is fully self-contained (Electron shell + portabl
 - Loopback-only server (`127.0.0.1`), never exposed to the LAN
 - Automatically installs the bundled `dshmarket` plugin on first launch
 - Adds the bundled `dsh` CLI directory to the current user's PATH during installation
+- Supports workspace-free conversations with managed per-task directories
+- Permanently deletes sessions from the conversation menu after confirmation
 
 ## Download
 
@@ -90,12 +92,12 @@ pnpm start
 > [!NOTE]
 > **Developers only.** If you just want to *use* Caisson, skip this section — download the prebuilt installer from [Releases](https://github.com/adverturer/Caisson/releases) and you are done; nothing else is required.
 
-This repository holds the launcher source only — not the ~250 MB DSH runtime closure. The bundled runtime is an npm-installed `@deepseek-ai/dsh@0.1.0-rc.6` closure (with the per-model reasoning-effort + cancel-all feature overlay applied to `dsh-client-ui-settings-models`). This release also bootstraps the `dshmarket` plugin and exposes the bundled CLI after installation.
+This repository holds the launcher source only — not the ~250 MB DSH runtime closure. Release builds use a prepared DSH runtime closure containing the Caisson feature set. The launcher also bootstraps the `dshmarket` plugin and exposes the bundled CLI after installation.
 
 ### Prerequisites
 
 1. A portable Node.js runtime staged at `dist-runtime/node/node.exe` (used as the bundled Node). Download from [npmmirror](https://npmmirror.com/mirrors/node/v24.18.0/node-v24.18.0-win-x64.zip) and extract into `dist-runtime/node/`.
-2. The rc.6 runtime closure: `npm install @deepseek-ai/dsh` in a separate directory, then apply the feature overlay by copying `packages/client/ui-settings-models/lib/client.js` from a deepseek-harness source build over `node_modules/@deepseek-ai/dsh-client-ui-settings-models/lib/client.js`.
+2. A prepared DSH runtime closure containing `package.json`, `node_modules`, and the compiled Web frontend. Set its path through `DSH_DESKTOP_RUNTIME_SOURCE`, or stage it at `dist-runtime/final`.
 3. Electron 33 installed at `node_modules/electron/dist` (the `electronDist` config points here).
 
 ### Package
@@ -106,11 +108,11 @@ npx tsc -p tsconfig.json
 npx electron-builder --win
 ```
 
-Output: `release-0.1.2/Caisson Setup 0.1.2.exe`
+Output: `release-0.1.3/Caisson Setup 0.1.3.exe`
 
-The `afterPack` hook (`scripts/after-pack.cjs`) copies the full rc.6 closure from the npm install directory into `resources/runtime/`, restoring the root `node_modules` that electron-builder's file filter drops.
+The `afterPack` hook (`scripts/after-pack.cjs`) copies the prepared closure into `resources/runtime/`, restoring the root `node_modules` that electron-builder's file filter drops.
 
-Set `DSH_DESKTOP_RUNTIME_SOURCE` to the prepared rc.6 npm closure before packaging. When it is omitted, `afterPack` uses `dist-runtime/final`.
+Set `DSH_DESKTOP_RUNTIME_SOURCE` to the prepared runtime closure before packaging. When it is omitted, `afterPack` uses `dist-runtime/final`.
 
 ## Environment variables
 
@@ -119,7 +121,7 @@ Set `DSH_DESKTOP_RUNTIME_SOURCE` to the prepared rc.6 npm closure before packagi
 | `DSH_DESKTOP_PORT` | `3080` | Web port the launcher manages and opens |
 | `DSH_REPO_ROOT` | derived | deepseek-harness checkout root (source mode) |
 | `DSH_NODE` | `NODE` / `node` | Node executable for the DSH CLI (source mode) |
-| `DSH_DESKTOP_RUNTIME_SOURCE` | `dist-runtime/final` | Prepared rc.6 npm closure copied into packaged builds |
+| `DSH_DESKTOP_RUNTIME_SOURCE` | `dist-runtime/final` | Prepared DSH runtime closure copied into packaged builds |
 | `DSH_DESKTOP_NODE_VERSION` | `v24.18.0` | Node.js version bundled at package time |
 | `DSH_DESKTOP_NODE_MIRROR` | npmmirror | Custom Node.js download mirror |
 
