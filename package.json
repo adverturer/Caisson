@@ -1,7 +1,7 @@
 {
   "name": "@deepseek-ai/dsh-desktop",
   "description": "Electron launcher for the dsh Web GUI: spawns or attaches to the dsh web server and carries a system-tray menu.",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "private": true,
   "license": "MIT",
   "type": "commonjs",
@@ -23,11 +23,11 @@
   "build": {
     "appId": "com.caisson.launcher",
     "productName": "Caisson",
-    "buildVersion": "0.1.1",
-    "artifactName": "Caisson Setup 0.1.1.${ext}",
+    "buildVersion": "0.1.2",
+    "artifactName": "Caisson Setup 0.1.2.${ext}",
     "asar": true,
     "directories": {
-      "output": "release-0.1.1"
+      "output": "release-0.1.2"
     },
     "electronDist": "node_modules/electron/dist",
     "afterPack": "scripts/after-pack.cjs",

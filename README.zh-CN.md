@@ -29,6 +29,8 @@ Caisson 把 DeepSeek Harness 的 Web 界面装进原生 Electron 窗口，并负
 - 退出时清理整个子进程树
 - 外部链接用系统默认浏览器打开
 - 服务只监听回环地址（`127.0.0.1`），不向局域网暴露
+- 首次启动自动安装内置的 `dshmarket` 插件
+- 安装时自动将内置 `dsh` CLI 目录加入当前用户的 PATH
 
 ## 下载
 
@@ -88,7 +90,7 @@ pnpm start
 > [!NOTE]
 > **仅面向开发者。** 如果你只是想*使用* Caisson，跳过本节——从 [Releases](https://github.com/adverturer/Caisson/releases) 下载预构建安装包即可，无需其他任何东西。
 
-本仓库只保存启动器源码——不含约 250 MB 的 DSH 运行时闭包。内置运行时是通过 `npm install @deepseek-ai/dsh@0.1.0-rc.6` 安装的 rc.6 闭包，并在 `dsh-client-ui-settings-models` 上叠加了推理强度 + 取消全部功能。
+本仓库只保存启动器源码——不含约 250 MB 的 DSH 运行时闭包。内置运行时是通过 `npm install @deepseek-ai/dsh@0.1.0-rc.6` 安装的 rc.6 闭包，并在 `dsh-client-ui-settings-models` 上叠加了推理强度 + 取消全部功能；本版本还会自动配置 `dshmarket` 插件并在安装后提供内置 CLI。
 
 ### 前置条件
 
@@ -104,7 +106,7 @@ npx tsc -p tsconfig.json
 npx electron-builder --win
 ```
 
-产物：`release-0.1.1/Caisson Setup 0.1.1.exe`
+产物：`release-0.1.2/Caisson Setup 0.1.2.exe`
 
 `afterPack` 钩子（`scripts/after-pack.cjs`）把 rc.6 闭包从 npm 安装目录复制进 `resources/runtime/`，恢复 electron-builder 文件过滤器丢掉的根 `node_modules`。
 

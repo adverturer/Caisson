@@ -29,6 +29,8 @@ The prebuilt Windows installer is fully self-contained (Electron shell + portabl
 - Kills the whole spawned child process tree on quit
 - Opens external links in the default browser
 - Loopback-only server (`127.0.0.1`), never exposed to the LAN
+- Automatically installs the bundled `dshmarket` plugin on first launch
+- Adds the bundled `dsh` CLI directory to the current user's PATH during installation
 
 ## Download
 
@@ -88,7 +90,7 @@ pnpm start
 > [!NOTE]
 > **Developers only.** If you just want to *use* Caisson, skip this section — download the prebuilt installer from [Releases](https://github.com/adverturer/Caisson/releases) and you are done; nothing else is required.
 
-This repository holds the launcher source only — not the ~250 MB DSH runtime closure. The bundled runtime is an npm-installed `@deepseek-ai/dsh@0.1.0-rc.6` closure (with the per-model reasoning-effort + cancel-all feature overlay applied to `dsh-client-ui-settings-models`).
+This repository holds the launcher source only — not the ~250 MB DSH runtime closure. The bundled runtime is an npm-installed `@deepseek-ai/dsh@0.1.0-rc.6` closure (with the per-model reasoning-effort + cancel-all feature overlay applied to `dsh-client-ui-settings-models`). This release also bootstraps the `dshmarket` plugin and exposes the bundled CLI after installation.
 
 ### Prerequisites
 
@@ -104,7 +106,7 @@ npx tsc -p tsconfig.json
 npx electron-builder --win
 ```
 
-Output: `release-0.1.1/Caisson Setup 0.1.1.exe`
+Output: `release-0.1.2/Caisson Setup 0.1.2.exe`
 
 The `afterPack` hook (`scripts/after-pack.cjs`) copies the full rc.6 closure from the npm install directory into `resources/runtime/`, restoring the root `node_modules` that electron-builder's file filter drops.
 
